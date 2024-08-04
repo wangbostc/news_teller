@@ -1,5 +1,5 @@
 import pytest
-from utils import format_docs
+from news_teller.utils import format_docs
 from langchain_core.documents import Document
 
 @pytest.fixture
