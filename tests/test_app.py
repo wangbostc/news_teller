@@ -1,49 +1,28 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from fastapi.testclient import TestClient
-from app import app, construct_chain
+from app import app
 
-client = TestClient(app)
+with TestClient(app) as client:
+    def test_root_endpoint():
+        response = client.get("/")
+        assert response.status_code == 200
+        assert response.json() == ["This is a news chatbot"]
 
-@pytest.fixture(scope="module", autouse=True)
-def mock_chain():
-    # Create a mock chain object
-    mock = MagicMock()
-    # Configure the mock to return a specific response
-    mock.invoke.return_value = "Mocked news content"
-    # Override the global `chain` with the mock
-    global chain
-    chain = mock
-    yield
-    # Cleanup if needed (e.g., reset chain to its original state)
-    del chain
-
-def test_root_endpoint():
-    response = client.get("/")
-    assert response.status_code == 200
-    assert response.json() == ["This is a news chatbot"]
-
-@pytest.mark.skip(reason="Not implemented")
-@patch("app.construct_chain")
-def test_query_endpoint_valid_request(mock_chain_constructor):
-    # Mock the chain object
-    mock_chain = mock_chain_constructor.return_value
-    mock_chain.invoke.return_value = "This is the latest news."
-
-    response = client.post("/olymics_news_chatbot", json={"query": "latest news"})
+    def test_query_endpoint_success():
+        # Test with a valid query
+        query_data = {"query": "latest olympics news"}
+        response = client.post("/olymics_news_chatbot", json=query_data)
+        assert response.status_code == 200
+        assert "Latest news" in response.json()
+        
+    def test_query_endpoint_invalid_input():
+        # test no input
+        response = client.post("/olymics_news_chatbot", json={"query": ""})
+        assert response.status_code == 400
+        assert response.json() == {"detail": "Query is required"}
     
-    assert response.status_code == 200
-    assert response.json() == {"Latest news": "This is the latest news."}
-
-@pytest.mark.skip(reason="Not implemented")
-def test_query_endpoint_no_retriever():
-    with pytest.raises(RuntimeError):
-        response = client.post("/olymics_news_chatbot", json={"query": "latest news"})
-        assert response.status_code == 500
-        assert response.json() == {"detail": "News content not available"}
-
-@pytest.mark.skip(reason="Not implemented")
-def test_query_endpoint_invalid_request():
-    response = client.post("/olymics_news_chatbot", json={"query": ""})
-    assert response.status_code == 400
-    assert response.json() == {"detail": "Query is required"}
+client_no_chain = TestClient(app)
+def test_query_endpoint_no_chain():
+    response = client_no_chain.post("/olymics_news_chatbot", json={"query": "latest news"})
+    assert response.status_code == 500
