@@ -5,7 +5,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import VectorStore, VectorStoreRetriever
 from langchain_core.documents import Document
-from config import OPENAI_API_KEY
+from config import OPENAI_API_KEY, DB_PATH
 
 
 class NewsRetriever:
@@ -39,7 +39,7 @@ class NewsRetriever:
         )
         self.chunks = self.chunk_document()
         self.vectorstore_type = vectorstore_type or Chroma
-        self.vectorstore = self.store_documents()
+        self.vectorstore = None
 
     def chunk_document(self) -> List[Document]:
         splitter = RecursiveCharacterTextSplitter(
@@ -47,13 +47,24 @@ class NewsRetriever:
         )
         return splitter.split_documents(self.document)
 
-    def store_documents(self) -> VectorStore:
-        vectorstore = self.vectorstore_type.from_documents(
-            documents=self.chunks, embedding=self.embedding_model
-        )
-        return vectorstore
+    def store_documents(self, presist: bool = True) -> VectorStore:
+        if presist:
+            self.vectorstore = self.vectorstore_type.from_documents(
+                documents=self.chunks,
+                embedding=self.embedding_model,
+                persist_directory=DB_PATH,
+            )
+        else:
+            self.vectorstore = self.vectorstore_type.from_documents(
+                documents=self.chunks, embedding=self.embedding_model
+            )
+        return self.vectorstore
 
-    def get_retriever(self) -> VectorStoreRetriever:
+    def get_retriever(self, from_presist: bool = False) -> VectorStoreRetriever:
+        if from_presist:
+            self.vectorstore = Chroma(
+                persist_directory=DB_PATH, embedding_function=self.embedding_model
+            )
         return self.vectorstore.as_retriever(
             search_type="similarity", search_kwargs={"k": self.top_k}
         )
