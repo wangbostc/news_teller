@@ -3,8 +3,6 @@ from typing import List, Union
 from langchain_community.document_loaders import AsyncHtmlLoader
 from langchain_core.documents import Document, BaseDocumentTransformer
 from langchain_text_splitters import TextSplitter
-from langchain_core.embeddings import Embeddings
-from langchain_core.vectorstores import VectorStore
 from langchain_core.documents import Document
 
 from news_teller.config import DB_PATH

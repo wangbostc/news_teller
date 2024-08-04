@@ -1,8 +1,8 @@
 # This script is used to populate the database with the scraped news content.
+from langchain_community.document_transformers import Html2TextTransformer
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
-from langchain_community.document_transformers import Html2TextTransformer
 from news_teller.config import NEWS_URLS, DB_PATH, TOP_K, OPENAI_API_KEY
 from news_teller.news_loader import (scrape_news_html_content, 
                                      process_raw_html_doc,
