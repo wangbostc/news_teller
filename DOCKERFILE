@@ -14,7 +14,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 80
 
 # Define environment variable
-ENV NAME World
+ENV DB_PATH=./chroma_db
+
+# Set the maintainer label
+LABEL maintainer="bo wang <wangbostc@gmail.com>"
+LABEL version="0.0.1"
 
 # Run app.py when the container launches
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["python", "src/app.py"]
