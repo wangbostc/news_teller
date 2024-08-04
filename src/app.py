@@ -1,28 +1,29 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from scraper import scrape_news
 from retriever import NewsRetriever
 from model import construct_chain, llm
 from config import NEWS_URLS
+from langchain.chains.base import Chain
 
 
 def initialize_retriever():
-    global chain
     try:
         news_content = scrape_news(NEWS_URLS)
-        retriever = NewsRetriever(news_content).get_retriever()
-        chain = construct_chain(retriever, llm)
+        retriever = NewsRetriever(news_content)
+        retriever.store_documents(presist=True)
+        retri = retriever.get_retriever(from_presist=True)
+        return construct_chain(retri, llm)
     except RuntimeError as e:
         print(f"Error during initialization: {e}")
-        chain = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    initialize_retriever()
-    yield
+    chain = initialize_retriever()
+    yield {"chain": chain}
 
 
 app = FastAPI(lifespan=lifespan)
@@ -38,15 +39,16 @@ async def root():
 
 
 @app.post("/olymics_news_chatbot")
-async def query(request: QueryRequest):
-    if chain is None:
-        raise HTTPException(status_code=500, detail="News content not available")
-
+async def query(request: Request, request_body: QueryRequest):
+    """
+    Process a user query and return the latest news based on the query.
+    """
+    
+    user_query = request_body.query
+    if not user_query:
+        raise HTTPException(status_code=400, detail="Query is required")
     try:
-        user_query = request.query
-        if not user_query:
-            raise HTTPException(status_code=400, detail="Query is required")
-
+        chain = request.state.chain
         response = chain.invoke(user_query)
         return {"Latest news": response}
     except Exception as e:

@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+DB_PATH = os.getenv("DB_PATH")
+
 NEWS_URLS = [
     # "https://edition.cnn.com/sport/",
     # "https://www.news.com.au/sport/olympics",
