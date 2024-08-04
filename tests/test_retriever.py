@@ -29,7 +29,8 @@ def test_chunk_document(document, chunk_size, chunk_overlap, expected_chunks):
     (100, 0, 5, 5),
 ])
 def test_retrieve_top_k(document, chunk_size, chunk_overlap, top_k, expected_num_of_retrievals):
-    retriever = NewsRetriever(document, chunk_size=chunk_size, chunk_overlap=chunk_overlap, top_k=top_k).get_retriever()
-    result = retriever.invoke("vectorstore is good.")
+    retriever =  NewsRetriever(document, chunk_size=chunk_size, chunk_overlap=chunk_overlap, top_k=top_k)
+    retriever.store_documents(presist=False)
+    result=retriever.get_retriever(from_presist=False).invoke("vectorstore is good.")
     assert len(result) == expected_num_of_retrievals
     assert result[0].page_content == 'vectorstore is very fast.'
