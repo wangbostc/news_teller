@@ -22,7 +22,7 @@ with TestClient(app) as client:
         assert response.status_code == 400
         assert response.json() == {"detail": "Query is required"}
     
-client_no_chain = TestClient(app)
 def test_query_endpoint_no_chain():
+    client_no_chain = TestClient(app)
     response = client_no_chain.post("/olymics_news_chatbot", json={"query": "latest news"})
     assert response.status_code == 500
