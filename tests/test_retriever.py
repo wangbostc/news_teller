@@ -1,7 +1,6 @@
 import pytest
 from retriever import NewsRetriever
 from langchain_core.documents import Document
-from unittest.mock import patch
 
 @pytest.fixture
 def document():
