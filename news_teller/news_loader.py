@@ -7,6 +7,7 @@ from langchain_core.documents import Document
 
 from news_teller.config import DB_PATH
 
+
 def scrape_news_html_content(urls: Union[List[str], str]) -> str:
     try:
         loader = AsyncHtmlLoader(urls)
@@ -16,10 +17,11 @@ def scrape_news_html_content(urls: Union[List[str], str]) -> str:
         raise RuntimeError(f"Error scraping news: {e}")
 
 
-def process_raw_html_doc(raw_html_doc: Document,
-                         html2text_transfomer:BaseDocumentTransformer,
-                         text_splitter: TextSplitter,
-                         ) -> List[Document]:
+def process_raw_html_doc(
+    raw_html_doc: Document,
+    html2text_transfomer: BaseDocumentTransformer,
+    text_splitter: TextSplitter,
+) -> List[Document]:
     """
     Process the document by splitting it into chunks, embedding it, and storing it in a vectorstore.
     """
