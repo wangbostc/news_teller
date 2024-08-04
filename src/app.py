@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import logging
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -41,17 +42,13 @@ async def root():
 async def query(request: QueryRequest):
     if chain is None:
         raise HTTPException(status_code=500, detail="News content not available")
+    
+    user_query = request.query
+    if not user_query:
+        raise HTTPException(status_code=400, detail="Query is required")
 
-    try:
-        user_query = request.query
-        if not user_query:
-            raise HTTPException(status_code=400, detail="Query is required")
-
-        response = chain.invoke(user_query)
-        return {"Latest news": response}
-    except Exception as e:
-        app.logger.error(f"Error occurred: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    response = chain.invoke(user_query)
+    return {"Latest news": response}
 
 
 if __name__ == "__main__":
