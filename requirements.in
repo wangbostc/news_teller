@@ -1,0 +1,12 @@
+bs4==0.0.2
+fastapi==0.112.0
+langchain-chroma==0.1.2
+langchain-community==0.2.10
+langchain-core==0.2.27
+langchain-openai==0.1.20
+langchain-text-splitters==0.2.2
+pydantic==2.8.2
+pytest==8.3.2
+python-dotenv==1.0.1
+uvicorn==0.30.5
+html2text==2024.2.26
