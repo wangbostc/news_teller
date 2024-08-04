@@ -1,5 +1,4 @@
 from contextlib import asynccontextmanager
-import logging
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -17,7 +16,7 @@ def initialize_retriever():
         chain = construct_chain(retriever, llm)
     except RuntimeError as e:
         print(f"Error during initialization: {e}")
-        retriever = None
+        chain = None
 
 
 @asynccontextmanager
@@ -42,13 +41,16 @@ async def root():
 async def query(request: QueryRequest):
     if chain is None:
         raise HTTPException(status_code=500, detail="News content not available")
-    
-    user_query = request.query
-    if not user_query:
-        raise HTTPException(status_code=400, detail="Query is required")
 
-    response = chain.invoke(user_query)
-    return {"Latest news": response}
+    try:
+        user_query = request.query
+        if not user_query:
+            raise HTTPException(status_code=400, detail="Query is required")
+
+        response = chain.invoke(user_query)
+        return {"Latest news": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":
